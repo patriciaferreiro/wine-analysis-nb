@@ -2,20 +2,17 @@
 # P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis.
 # Modeling wine preferences by data mining from physicochemical properties. In Decision Support Systems, Elsevier, 47(4):547-553, 2009.
 
-import os
-import warnings
+import logging
 import sys
+import warnings
+from urllib.parse import urlparse
 
-import pandas as pd
+import mlflow.sklearn
 import numpy as np
+import pandas as pd
+from sklearn.linear_model import ElasticNet
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import ElasticNet
-from urllib.parse import urlparse
-import mlflow
-import mlflow.sklearn
-
-import logging
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
@@ -34,13 +31,13 @@ if __name__ == "__main__":
 
     # Read the wine-quality csv file from the URL
     csv_url = (
-        "http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
+        'http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv'
     )
     try:
         data = pd.read_csv(csv_url, sep=";")
     except Exception as e:
         logger.exception(
-            "Unable to download training & test CSV, check your internet connection. Error: %s", e
+            f'Unable to download training & test CSV, check your internet connection. Error: {e}'
         )
 
     # Split the data into training and test sets. (0.75, 0.25) split.
@@ -73,7 +70,7 @@ if __name__ == "__main__":
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
         mlflow.log_metric("mae", mae)
-	mlflow.set_tag("model.type","elasticnet")
+        mlflow.set_tag("model.type", "elasticnet")
 
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
 
