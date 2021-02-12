@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 import mlflow.sklearn
 import numpy as np
 import pandas as pd
+from mlflow.models.signature import infer_signature
 from sklearn.linear_model import ElasticNet
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
@@ -60,10 +61,10 @@ if __name__ == "__main__":
 
         (rmse, mae, r2) = eval_metrics(test_y, predicted_qualities)
 
-        print("Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
-        print("  RMSE: %s" % rmse)
-        print("  MAE: %s" % mae)
-        print("  R2: %s" % r2)
+        print(f'Elasticnet model (alpha={alpha}, l1_ratio={l1_ratio})')
+        print(f'RMSE: {rmse:.2f}')
+        print(f'MAE: {mae:.2f}')
+        print(f'R2: {r2:.2f}')
 
         mlflow.log_param("alpha", alpha)
         mlflow.log_param("l1_ratio", l1_ratio)
@@ -73,6 +74,10 @@ if __name__ == "__main__":
         mlflow.set_tag("model.type", "elasticnet")
 
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
+
+        # infer scoring input and output schemas
+        # specify it manually https://mlflow.org/docs/latest/models.html#how-to-log-models-with-signatures
+        signature = infer_signature(train_x, lr.predict(train_x))
 
         # Model registry does not work with file store
         if tracking_url_type_store != "file":
