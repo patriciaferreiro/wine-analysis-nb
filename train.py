@@ -78,7 +78,9 @@ if __name__ == "__main__":
         # infer scoring input and output schemas
         # specify it manually https://mlflow.org/docs/latest/models.html#how-to-log-models-with-signatures
         signature = infer_signature(train_x, lr.predict(train_x))
-
+        # load json input example from file
+        with open('input_example.json') as f:
+            input_example = json.load(f)
         # Model registry does not work with file store
         if tracking_url_type_store != "file":
 
@@ -86,6 +88,6 @@ if __name__ == "__main__":
             # There are other ways to use the Model Registry, which depends on the use case,
             # please refer to the doc for more information:
             # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-            mlflow.sklearn.log_model(lr, "model", signature=signature, registered_model_name="wine-quality")
+            mlflow.sklearn.log_model(lr, "model", signature=signature, input_example=input_example, registered_model_name="wine-quality")
         else:
-            mlflow.sklearn.log_model(lr, "model", signature=signature)
+            mlflow.sklearn.log_model(lr, "model", input_example=input_example, signature=signature)
